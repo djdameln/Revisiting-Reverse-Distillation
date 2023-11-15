@@ -4,13 +4,14 @@ import torch
 import numpy as np
 import random
 from pathlib import Path
+from argparse import ArgumentParser
 
 # parameters
 DATASETS = ["visa"]
 CATEGORIES = {
     # "mvtec_ad": ['screw', 'pill', 'capsule', 'carpet', 'grid', 'tile', 'wood', 'zipper', 'cable', 'toothbrush', 'transistor', 'metal_nut', 'bottle', 'hazelnut', 'leather'],
     # "visa": ["candle", "capsules", "cashew", "chewinggum", "fryum", "macaroni1", "macaroni2", "pcb1", "pcb2", "pcb3", "pcb4", "pipe_fryum"]
-    "visa": ["macaroni2", "pcb1", "pcb2", "pcb3", "pcb4", "pipe_fryum"]
+    "visa": ["pcb4", "pipe_fryum"]
 }
 # CATEGORIES = {
 #     "mvtec_ad": ['bottle'],
@@ -27,6 +28,12 @@ PROJ_LR=0.001
 DISTILL_LR=0.005
 WEIGHT_PROJ=0.2
 
+def get_args():
+    parser = ArgumentParser()
+    parser.add_argument('--gpu', default=0, type=int)
+    pars = parser.parse_args()
+    return pars
+
 def setup_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -39,6 +46,8 @@ def setup_seed(seed):
 if __name__ == '__main__':
     setup_seed(42)
     metrics = {'class': [], 'AUROC_sample':[], 'AUROC_pixel': [], 'AUPRO_pixel': []}
+
+    args=get_args()
     
     # train all_classes
     # for c in all_classes
@@ -54,7 +63,8 @@ if __name__ == '__main__':
                                                  image_size=IMAGE_SIZE,
                                                  proj_lr=PROJ_LR,
                                                  distill_lr=DISTILL_LR,
-                                                 weight_proj=WEIGHT_PROJ)
+                                                 weight_proj=WEIGHT_PROJ,
+                                                 gpu=args.gpu)
             # print('Best score of class: {}, Auroc sample: {:.4f}, Auroc pixel:{:.4f}, Pixel Aupro: {:.4f}'.format(c, auroc_sp, auroc_px, aupro_px))
             # metrics['class'].append(c)
             # metrics['AUROC_sample'].append(auroc_sp)

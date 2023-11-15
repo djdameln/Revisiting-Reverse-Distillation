@@ -53,11 +53,12 @@ def train(
         image_size=256,
         proj_lr=0.001,
         distill_lr=0.005,
-        weight_proj=0.2
+        weight_proj=0.2,
+        gpu=0,
         ):
     print(_class_)
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
     data_transform, gt_transform = get_data_transforms(image_size, image_size)
     
