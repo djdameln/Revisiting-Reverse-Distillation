@@ -75,7 +75,6 @@ def evaluation_multi_proj(encoder,proj,bn, decoder, dataloader,device):
             anomaly_map = gaussian_filter(anomaly_map, sigma=4)
             gt[gt > 0.5] = 1
             gt[gt <= 0.5] = 0
-            anomaly_map_eval = cv2.resize(anomaly_map, (gt.shape[-1], gt.shape[-2]), interpolation=cv2.INTER_LINEAR)
             # if label.item()!=0:
             #     aupro_list.append(compute_pro(gt.squeeze(0).cpu().numpy().astype(int),
             #                                   anomaly_map_eval[np.newaxis,:,:]))
@@ -83,7 +82,7 @@ def evaluation_multi_proj(encoder,proj,bn, decoder, dataloader,device):
             # pr_list_px.extend(anomaly_map_eval.ravel())
             # gt_list_sp.append(np.max(gt.cpu().numpy().astype(int)))
             # pr_list_sp.append(np.max(anomaly_map_eval))
-            anomaly_map_list.append(anomaly_map_eval)
+            anomaly_map_list.append(anomaly_map)
             img_path_list.extend(img_path)
 
         # auroc_px = round(roc_auc_score(gt_list_px, pr_list_px), 4)
