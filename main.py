@@ -115,7 +115,7 @@ def train(
 
 
     # set appropriate epochs for specific classes (Some classes converge faster than others)
-    num_epoch = 1
+    num_epoch = 300
     if _class_ in ['carpet','leather']:
         num_epoch = 10
     if _class_ in ['grid','tile']:
