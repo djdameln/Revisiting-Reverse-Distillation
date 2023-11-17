@@ -33,7 +33,7 @@ def get_data_transforms(size, isize):
     data_transforms = transforms.Compose([Normalize(),\
                     ToTensor()])
     gt_transforms = transforms.Compose([
-        # transforms.Resize((size, size)),
+        transforms.Resize((size, size)),
         transforms.ToTensor()])
     return data_transforms, gt_transforms
 
@@ -222,22 +222,19 @@ class VisaDataset_test(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         img_path, gt, label, img_type = self.img_paths[idx], self.gt_paths[idx], self.labels[idx], self.types[idx]
-        raw_img = cv2.imread(img_path)
-        img = cv2.cvtColor(raw_img, cv2.COLOR_BGR2RGB)
+        img = cv2.imread(img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img= cv2.resize(img/255., (256, 256))
         ## Normal
         img = self.transform(img)
         ## simplex_noise
         
         if gt == 0:
-            gt = torch.zeros([1, raw_img.shape[0], raw_img.shape[1]])
+            gt = torch.zeros([1, img.shape[-1], img.shape[-1]])
         else:
             gt = Image.open(gt)
             gt = self.gt_transform(gt)
 
-        # assert img.shape[1:] == gt.shape[1:], "image.size != gt.size !!!"
+        assert img.shape[1:] == gt.shape[1:], "image.size != gt.size !!!"
 
         return (img, gt[0].unsqueeze(0), label, img_type, img_path)
-
-
-

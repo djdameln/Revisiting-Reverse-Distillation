@@ -115,7 +115,7 @@ def train(
 
 
     # set appropriate epochs for specific classes (Some classes converge faster than others)
-    num_epoch = 300
+    num_epoch = 1
     if _class_ in ['carpet','leather']:
         num_epoch = 10
     if _class_ in ['grid','tile']:
@@ -181,70 +181,70 @@ def train(
             loss_distill_running += L_distill.detach().cpu().item()
             
 
-        _, _, _, anomaly_maps, img_paths = evaluation_multi_proj(encoder, proj_layer, bn, decoder, test_dataloader, device)        
-        # auroc_px_list.append(auroc_px)
-        # auroc_sp_list.append(auroc_sp)
+        auroc_px, auroc_sp, _, anomaly_maps, img_paths = evaluation_multi_proj(encoder, proj_layer, bn, decoder, test_dataloader, device)        
+        auroc_px_list.append(auroc_px)
+        auroc_sp_list.append(auroc_sp)
         # aupro_px_list.append(aupro_px)
         loss_proj.append(loss_proj_running)
         loss_distill.append(loss_distill_running)
         total_loss.append(total_loss_running)
         
         
-        # figure = plt.gcf() # get current figure
-        # figure.set_size_inches(8, 12)
-        # fig, ax = plt.subplots(3,2, figsize = (8, 12))
-        # ax[0][0].plot(auroc_px_list)
-        # ax[0][0].set_title('auroc_px')
-        # ax[0][1].plot(auroc_sp_list)
-        # ax[0][1].set_title('auroc_sp')
+        figure = plt.gcf() # get current figure
+        figure.set_size_inches(8, 12)
+        fig, ax = plt.subplots(3,2, figsize = (8, 12))
+        ax[0][0].plot(auroc_px_list)
+        ax[0][0].set_title('auroc_px')
+        ax[0][1].plot(auroc_sp_list)
+        ax[0][1].set_title('auroc_sp')
         # ax[1][0].plot(aupro_px_list)
         # ax[1][0].set_title('aupro_px')
-        # ax[1][1].plot(loss_proj)
-        # ax[1][1].set_title('loss_proj')
-        # ax[2][0].plot(loss_distill)
-        # ax[2][0].set_title('loss_distill')
-        # ax[2][1].plot(total_loss)
-        # ax[2][1].set_title('total_loss')
-        # plt.savefig(save_folder + '/monitor_traning.png', dpi = 100)
+        ax[1][1].plot(loss_proj)
+        ax[1][1].set_title('loss_proj')
+        ax[2][0].plot(loss_distill)
+        ax[2][0].set_title('loss_distill')
+        ax[2][1].plot(total_loss)
+        ax[2][1].set_title('total_loss')
+        plt.savefig(save_folder + '/monitor_traning.png', dpi = 100)
     
         
-        # print('Epoch {}, Sample Auroc: {:.4f}, Pixel Auroc:{:.4f}, Pixel Aupro: {:.4f}'.format(epoch, auroc_sp, auroc_px, aupro_px))
+        print('Epoch {}, Sample Auroc: {:.4f}, Pixel Auroc:{:.4f}, Pixel Aupro: {:.4f}'.format(epoch, auroc_sp, auroc_px, 0))
     
 
-        # if (auroc_px + auroc_sp + aupro_px) / 3 > best_score:
-        #     best_score = (auroc_px + auroc_sp + aupro_px) / 3
+        if auroc_px > best_score:
+            best_score = auroc_px
             
-        #     best_auroc_px = auroc_px
-        #     best_auroc_sp = auroc_sp
-        #     best_aupro_px = aupro_px
-        #     best_epoch = epoch
+            best_auroc_px = auroc_px
+            best_auroc_sp = auroc_sp
+            # best_aupro_px = aupro_px
+            best_epoch = epoch
 
-        #     best_anomaly_maps = anomaly_maps
-        #     best_img_paths = img_paths
+            best_anomaly_maps = anomaly_maps
+            best_img_paths = img_paths
 
-        #     torch.save({'proj': proj_layer.state_dict(),
-        #                'decoder': decoder.state_dict(),
-        #                 'bn':bn.state_dict()}, save_model_path)
+            torch.save({'proj': proj_layer.state_dict(),
+                       'decoder': decoder.state_dict(),
+                        'bn':bn.state_dict()}, save_model_path)
 
-        #     history_infor['auroc_sp'] = best_auroc_sp
-        #     history_infor['auroc_px'] = best_auroc_px
-        #     history_infor['aupro_px'] = best_aupro_px
-        #     history_infor['epoch'] = best_epoch
-        #     with open(os.path.join(save_folder, f'history.json'), 'w') as f:
-        #         json.dump(history_infor, f)
+            history_infor['auroc_sp'] = best_auroc_sp
+            history_infor['auroc_px'] = best_auroc_px
+            history_infor['aupro_px'] = best_aupro_px
+            history_infor['epoch'] = best_epoch
+            with open(os.path.join(save_folder, f'history.json'), 'w') as f:
+                json.dump(history_infor, f)
 
-        # save anomaly maps
-        amaps = np.stack(anomaly_maps)
-        maps_path = Path(save_folder) / "asmaps.pt"
-        torch.save(amaps, maps_path)
+    # save anomaly maps
+    amaps = np.stack(best_anomaly_maps)
+    maps_path = Path(save_folder) / "asmaps.pt"
+    torch.save(amaps, maps_path)
 
-        # save the key
-        img_paths = [str(Path(*Path(path).parts[-3:])) + "\n" for path in img_paths]
-        keys_path = Path(save_folder) / "key.txt"
-        with open(keys_path, "w") as f:
-            f.writelines(img_paths)
+    # save the key
+    img_paths = [str(Path(*Path(path).parts[-3:])) + "\n" for path in best_img_paths]
+    keys_path = Path(save_folder) / "key.txt"
+    with open(keys_path, "w") as f:
+        f.writelines(img_paths)
 
-    return None, None, None
+    return best_auroc_sp, best_auroc_px, None
 
 
 

@@ -78,16 +78,16 @@ def evaluation_multi_proj(encoder,proj,bn, decoder, dataloader,device):
             # if label.item()!=0:
             #     aupro_list.append(compute_pro(gt.squeeze(0).cpu().numpy().astype(int),
             #                                   anomaly_map_eval[np.newaxis,:,:]))
-            # gt_list_px.extend(gt.cpu().numpy().astype(int).ravel())
-            # pr_list_px.extend(anomaly_map_eval.ravel())
-            # gt_list_sp.append(np.max(gt.cpu().numpy().astype(int)))
-            # pr_list_sp.append(np.max(anomaly_map_eval))
+            gt_list_px.extend(gt.cpu().numpy().astype(int).ravel())
+            pr_list_px.extend(anomaly_map.ravel())
+            gt_list_sp.append(np.max(gt.cpu().numpy().astype(int)))
+            pr_list_sp.append(np.max(anomaly_map))
             anomaly_map_list.append(anomaly_map)
             img_path_list.extend(img_path)
 
-        # auroc_px = round(roc_auc_score(gt_list_px, pr_list_px), 4)
-        # auroc_sp = round(roc_auc_score(gt_list_sp, pr_list_sp), 4)
-    return None, None, None, anomaly_map_list, img_path_list
+        auroc_px = round(roc_auc_score(gt_list_px, pr_list_px), 4)
+        auroc_sp = round(roc_auc_score(gt_list_sp, pr_list_sp), 4)
+    return auroc_px, auroc_sp, None, anomaly_map_list, img_path_list
 
 
 def compute_pro(masks: ndarray, amaps: ndarray, num_th: int = 200) -> None:
